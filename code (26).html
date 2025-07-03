@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài học Tiếng Trung Tương tác: Bài 1 - 你好</title>
+    <!-- Thư viện Hanzi Writer -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Roboto:ital,wght@0,400;0,700;1,400&display=swap');
+        :root {
+            --primary-color: #c0392b; --secondary-color: #e74c3c; --background-color: #fdf6f6;
+            --surface-color: #ffffff; --text-color: #333; --subtle-text-color: #6c757d;
+            --table-border-color: #dee2e6; --table-header-bg: #e9ecef; --code-bg: #f1f1f1;
+        }
+        body { font-family: 'Roboto', sans-serif; line-height: 1.8; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background-color: var(--surface-color); padding: 2rem 3rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .details-hidden .pinyin, .details-hidden .vietnamese { display: none; }
+        h1, h2, h3, h4 { font-family: 'Roboto', 'Noto Sans SC', sans-serif; font-weight: 700; color: var(--primary-color); }
+        h1 { text-align: center; }
+        h2 { border-bottom: 2px solid var(--secondary-color); padding-bottom: 10px; }
+        h3 { color: #34495e; }
+        h4 { color: #7f8c8d; border-left: 3px solid #e74c3c; padding-left: 10px; margin-top: 1.5rem;}
+
+        section { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px dashed #ccc; }
+        section:last-child { border-bottom: none; }
+        .controls { display: flex; gap: 10px; margin-bottom: 2rem; padding: 1rem; background-color: #e9ecef; border-radius: 8px; justify-content: center; }
+        button { border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background-color 0.2s, transform 0.1s; }
+        #toggle-details-btn { background-color: #ffc107; color: #333; }
+        .read-aloud-btn { background-color: #17a2b8; color: white; margin-top: 1rem; display: block; margin-left: auto; margin-right: auto; }
+        .chinese-text { font-family: 'Noto Sans SC', sans-serif; font-size: 1.5rem; line-height: 2.2; }
+        .chinese-text .word { cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: background-color 0.2s, color 0.2s; display: inline-block; margin: 0 1px; position: relative; border-bottom: 2px dotted transparent; }
+        .chinese-text .word:hover { background-color: var(--secondary-color); color: #fff; }
+        
+        .pinyin, .vietnamese { transition: all 0.3s ease; }
+        .pinyin { font-style: italic; color: #555; margin-top: -5px; margin-bottom: 5px; display: block; }
+        .vietnamese { color: var(--subtle-text-color); margin-top: -5px; font-size: 0.9em; display: block; }
+
+        .content-item, .example-item { margin-bottom: 1.5rem; border-left: 3px solid #e9ecef; padding-left: 15px; }
+        .structure { background-color: var(--code-bg); padding: 10px 15px; border-radius: 5px; text-align: center; font-weight: bold; margin: 1rem 0; font-family: 'Courier New', monospace; }
+        .note { font-style: italic; color: #7f8c8d; }
+        .dialogue-line { margin-bottom: 1.5rem; }
+        .speaker { font-weight: bold; color: var(--primary-color); }
+        .exercise ol { list-style-type: decimal; padding-left: 20px; }
+        .exercise li { margin-bottom: 10px; }
+
+        table.pronoun-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
+        table.pronoun-table th, table.pronoun-table td { border: 1px solid var(--table-border-color); padding: 12px; text-align: center; vertical-align: middle; }
+        table.pronoun-table th { background-color: var(--table-header-bg); }
+        table.pronoun-table td .chinese-text { font-size: 1.8rem; }
+        
+        .word-popup { display: none; position: absolute; background-color: white; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; padding: 8px; z-index: 1000; flex-direction: column; gap: 6px; min-width: 160px; }
+        .word-popup button { width: 100%; text-align: left; background-color: #f8f9fa; border: 1px solid #dee2e6; font-size: 0.9rem; padding: 8px 12px; }
+        .word-popup button:hover { background-color: #e9ecef; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position:relative; }
+        .modal-content h3 { margin-top: 0; font-size: 2rem; font-family: 'Noto Sans SC', sans-serif; }
+        #writing-target-div { width: 250px; height: 250px; margin: 15px auto; }
+        .modal-controls button { margin: 5px; }
+        #modal-close-btn { position: absolute; top: 15px; right: 20px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; background: none; color: #888;}
+        #modal-close-btn:hover { color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="chinese-text" data-sentence><span class="word">基</span><span class="word">础</span><span class="word">汉</span><span class="word">语</span><span class="word">第</span><span class="word">一</span><span class="word">课</span><span class="word">：</span><span class="word">你</span><span class="word">好</span></span></h1>
+        <div class="controls"><button id="toggle-details-btn">Ẩn Chi Tiết (Pinyin & Dịch)</button></div>
+        
+        <section id="lecture">
+            <h2><span class="chinese-text" data-sentence><span class="word">讲</span><span class="word">座</span></span> (Bài giảng)</h2>
+            
+            <div id="lecture-content">
+                <h3><span class="chinese-text" data-sentence><span class="word">人</span><span class="word">称</span><span class="word">代</span><span class="word">词</span></span> (Đại từ nhân xưng)</h3>
+                <p class="pinyin">(Rénchēng dàicí)</p>
+                <table class="pronoun-table">
+                    <thead><tr><th>Ngôi</th><th>Số Ít (单数)</th><th>Số Nhiều (复数)</th></tr></thead>
+                    <tbody>
+                        <tr><th>Ngôi thứ 1</th><td><div class="chinese-text" data-sentence><span class="word">我</span></div><span class="pinyin">(wǒ)</span><span class="vietnamese">(tôi)</span></td><td><div class="chinese-text" data-sentence><span class="word">我</span><span class="word">们</span></div><span class="pinyin">(wǒmen)</span><span class="vietnamese">(chúng tôi)</span></td></tr>
+                        <tr><th>Ngôi thứ 2</th><td><div class="chinese-text" data-sentence><span class="word">你</span></div><span class="pinyin">(nǐ)</span><span class="vietnamese">(bạn)</span></td><td><div class="chinese-text" data-sentence><span class="word">你</span><span class="word">们</span></div><span class="pinyin">(nǐmen)</span><span class="vietnamese">(các bạn)</span></td></tr>
+                        <tr><th rowspan="2">Ngôi thứ 3</th><td><div class="chinese-text" data-sentence><span class="word">他</span></div><span class="pinyin">(tā)</span><span class="vietnamese">(anh ấy)</span></td><td><div class="chinese-text" data-sentence><span class="word">他</span><span class="word">们</span></div><span class="pinyin">(tāmen)</span><span class="vietnamese">(họ - nam/hỗn hợp)</span></td></tr>
+                        <tr><td><div class="chinese-text" data-sentence><span class="word">她</span></div><span class="pinyin">(tā)</span><span class="vietnamese">(cô ấy)</span></td><td><div class="chinese-text" data-sentence><span class="word">她</span><span class="word">们</span></div><span class="pinyin">(tāmen)</span><span class="vietnamese">(họ - toàn nữ)</span></td></tr>
+                    </tbody>
+                </table>
+                <p class="note">Lưu ý: <span class="chinese-text" data-sentence><span class="word">他</span></span> và <span class="chinese-text" data-sentence><span class="word">她</span></span> có cùng cách phát âm (pinyin) là "tā" nhưng mặt chữ Hán khác nhau.</p>
+
+                <h3><span class="chinese-text" data-sentence><span class="word">动</span><span class="word">词</span><span class="word">“</span><span class="word">是</span><span class="word">”</span></span> (Động từ "shì" - là, thì, ở)</h3>
+                <h4>Câu khẳng định</h4>
+                <div class="structure">Chủ ngữ + 是 (shì) + Tân ngữ</div>
+                <div class="example-item">
+                    <p class="chinese-text" data-sentence><span class="word">我</span><span class="word">是</span><span class="word">学</span><span class="word">生</span><span class="word">。</span></p>
+                    <p class="pinyin">(Wǒ shì xuéshēng.)</p>
+                    <p class="vietnamese">Tôi là học sinh.</p>
+                </div>
+                
+                <h4>Câu phủ định</h4>
+                <div class="structure">Chủ ngữ + 不是 (bú shì) + Tân ngữ</div>
+                 <p class="note">Lưu ý: Khi “不 (bù)” đứng trước một từ có thanh 4 (như “是 shì”), nó sẽ biến điệu thành thanh 2 “bú”.</p>
+                <div class="example-item">
+                    <p class="chinese-text" data-sentence><span class="word">我</span><span class="word">不</span><span class="word">是</span><span class="word">学</span><span class="word">生</span><span class="word">。</span></p>
+                    <p class="pinyin">(Wǒ bú shì xuéshēng.)</p>
+                    <p class="vietnamese">Tôi không phải là học sinh.</p>
+                </div>
+
+                <h3><span class="chinese-text" data-sentence><span class="word">疑</span><span class="word">问</span><span class="word">助</span><span class="word">词</span><span class="word">“</span><span class="word">吗</span><span class="word">”</span></span> (Trợ từ nghi vấn "ma")</h3>
+                <p>Để tạo câu hỏi "có... không?", ta chỉ cần thêm trợ từ <span class="chinese-text" data-sentence><span class="word">吗</span></span> (ma) vào cuối một câu trần thuật.</p>
+                <div class="structure">Câu trần thuật + 吗 (ma)?</div>
+                <div class="example-item">
+                    <p class="chinese-text" data-sentence><span class="word">你</span><span class="word">是</span><span class="word">老</span><span class="word">师</span><span class="word">吗</span><span class="word">？</span></p>
+                    <p class="pinyin">(Nǐ shì lǎoshī ma?)</p>
+                    <p class="vietnamese">Bạn là giáo viên phải không?</p>
+                    <ul>
+                        <li>Trả lời khẳng định: <span class="chinese-text" data-sentence><span class="word">是</span><span class="word">，</span><span class="word">我</span><span class="word">是</span><span class="word">老</span><span class="word">师</span><span class="word">。</span></span> (Shì, wǒ shì lǎoshī.)</li>
+                        <li>Trả lời phủ định: <span class="chinese-text" data-sentence><span class="word">不</span><span class="word">，</span><span class="word">我</span><span class="word">不</span><span class="word">是</span><span class="word">老</span><span class="word">师</span><span class="word">。</span></span> (Bù, wǒ bú shì lǎoshī.)</li>
+                    </ul>
+                </div>
+                
+                <h3><span class="chinese-text" data-sentence><span class="word">基</span><span class="word">本</span><span class="word">问</span><span class="word">候</span><span class="word">语</span></span> (Các câu chào hỏi cơ bản)</h3>
+                <ul>
+                    <li><span class="chinese-text" data-sentence><span class="word">你</span><span class="word">好</span></span> <span class="pinyin">(Nǐ hǎo)</span>: Xin chào</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">你</span><span class="word">们</span><span class="word">好</span></span> <span class="pinyin">(Nǐmen hǎo)</span>: Xin chào (nhiều người)</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">老</span><span class="word">师</span><span class="word">好</span></span> <span class="pinyin">(Lǎoshī hǎo)</span>: Chào thầy/cô</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">谢</span><span class="word">谢</span></span> <span class="pinyin">(Xièxie)</span>: Cảm ơn</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">不</span><span class="word">客</span><span class="word">气</span></span> <span class="pinyin">(Bú kèqi)</span>: Đừng khách sáo</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">对</span><span class="word">不</span><span class="word">起</span></span> <span class="pinyin">(Duìbuqǐ)</span>: Xin lỗi</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">没</span><span class="word">关</span><span class="word">系</span></span> <span class="pinyin">(Méi guānxi)</span>: Không sao đâu</li>
+                    <li><span class="chinese-text" data-sentence><span class="word">再</span><span class="word">见</span></span> <span class="pinyin">(Zàijiàn)</span>: Tạm biệt</li>
+                </ul>
+            </div>
+            <button class="read-aloud-btn" data-target="lecture-content">🔊 Đọc cả bài giảng</button>
+        </section>
+
+        <section id="dialogue">
+            <h2><span class="chinese-text" data-sentence><span class="word">会</span><span class="word">话</span></span> (Bài hội thoại)</h2>
+            <div id="dialogue-content">
+                <p>Nhân vật: <strong><span class="chinese-text" data-sentence><span class="word">大</span><span class="word">卫</span></span> (Dàwèi)</strong>, <strong><span class="chinese-text" data-sentence><span class="word">玛</span><span class="word">丽</span></span> (Mǎlì)</strong></p>
+                <div class="dialogue-line">
+                    <p><span class="speaker">大卫:</span> <span class="chinese-text" data-sentence><span class="word">你</span><span class="word">好</span><span class="word">！</span></span></p>
+                    <p class="pinyin">(Nǐ hǎo!)</p><p class="vietnamese">(Xin chào!)</p>
+                </div>
+                <div class="dialogue-line">
+                    <p><span class="speaker">玛丽:</span> <span class="chinese-text" data-sentence><span class="word">你</span><span class="word">好</span><span class="word">！</span></span></p>
+                    <p class="pinyin">(Nǐ hǎo!)</p><p class="vietnamese">(Xin chào!)</p>
+                </div>
+                <div class="dialogue-line">
+                    <p><span class="speaker">大卫:</span> <span class="chinese-text" data-sentence><span class="word">我</span><span class="word">是</span><span class="word">学</span><span class="word">生</span><span class="word">。</span><span class="word">你</span><span class="word">是</span><span class="word">学</span><span class="word">生</span><span class="word">吗</span><span class="word">？</span></span></p>
+                    <p class="pinyin">(Wǒ shì xuéshēng. Nǐ shì xuéshēng ma?)</p><p class="vietnamese">(Tôi là học sinh. Bạn là học sinh phải không?)</p>
+                </div>
+                <div class="dialogue-line">
+                    <p><span class="speaker">玛丽:</span> <span class="chinese-text" data-sentence><span class="word">是</span><span class="word">，</span><span class="word">我</span><span class="word">也</span><span class="word">是</span><span class="word">学</span><span class="word">生</span><span class="word">。</span><span class="word">他</span><span class="word">是</span><span class="word">老</span><span class="word">师</span><span class="word">吗</span><span class="word">？</span></span></p>
+                    <p class="pinyin">(Shì, wǒ yě shì xuéshēng. Tā shì lǎoshī ma?)</p><p class="vietnamese">(Phải, tôi cũng là học sinh. Anh ấy là giáo viên phải không?)</p>
+                </div>
+                <div class="dialogue-line">
+                    <p><span class="speaker">大卫:</span> <span class="chinese-text" data-sentence><span class="word">不</span><span class="word">，</span><span class="word">他</span><span class="word">不</span><span class="word">是</span><span class="word">老</span><span class="word">师</span><span class="word">，</span><span class="word">他</span><span class="word">是</span><span class="word">医</span><span class="word">生</span><span class="word">。</span></span></p>
+                    <p class="pinyin">(Bù, tā bú shì lǎoshī, tā shì yīshēng.)</p><p class="vietnamese">(Không, anh ấy không phải giáo viên, anh ấy là bác sĩ.)</p>
+                </div>
+                 <div class="dialogue-line">
+                    <p><span class="speaker">玛丽:</span> <span class="chinese-text" data-sentence><span class="word">谢</span><span class="word">谢</span><span class="word">你</span><span class="word">。</span></span></p>
+                    <p class="pinyin">(Xièxie nǐ.)</p><p class="vietnamese">(Cảm ơn bạn.)</p>
+                </div>
+                <div class="dialogue-line">
+                    <p><span class="speaker">大卫:</span> <span class="chinese-text" data-sentence><span class="word">不</span><span class="word">客</span><span class="word">气</span><span class="word">。</span><span class="word">再</span><span class="word">见</span><span class="word">！</span></span></p>
+                    <p class="pinyin">(Bú kèqi. Zàijiàn!)</p><p class="vietnamese">(Không có gì. Tạm biệt!)</p>
+                </div>
+            </div>
+            <button class="read-aloud-btn" data-target="dialogue-content">🔊 Đọc cả hội thoại</button>
+        </section>
+
+        <section id="exercises">
+            <h2><span class="chinese-text" data-sentence><span class="word">练</span><span class="word">习</span></span> (Bài tập)</h2>
+            <div id="exercises-content">
+                <div class="exercise">
+                    <h4>Phần 1: Dịch sang tiếng Trung</h4>
+                    <ol>
+                        <li>Tôi là giáo viên.</li>
+                        <li>Bạn không phải là bác sĩ.</li>
+                        <li>Anh ấy là học sinh phải không?</li>
+                    </ol>
+                </div>
+                <div class="exercise">
+                    <h4>Phần 2: Điền “是” hoặc “不是” vào chỗ trống</h4>
+                    <ol>
+                        <li><span class="chinese-text" data-sentence><span class="word">我</span></span> ______ <span class="chinese-text" data-sentence><span class="word">老</span><span class="word">师</span><span class="word">，</span><span class="word">我</span><span class="word">是</span><span class="word">学</span><span class="word">生</span><span class="word">。</span></span></li>
+                        <li><span class="chinese-text" data-sentence><span class="word">你</span></span> ______ <span class="chinese-text" data-sentence><span class="word">学</span><span class="word">生</span><span class="word">吗</span><span class="word">？</span></span></li>
+                    </ol>
+                </div>
+                <div class="exercise">
+                    <h4>Phần 3: Chuyển các câu sau thành câu hỏi dùng “吗”</h4>
+                    <ol>
+                        <li><span class="chinese-text" data-sentence><span class="word">你</span><span class="word">是</span><span class="word">老</span><span class="word">师</span><span class="word">。</span></span></li>
+                        <li><span class="chinese-text" data-sentence><span class="word">他</span><span class="word">们</span><span class="word">是</span><span class="word">医</span><span class="word">生</span><span class="word">。</span></span></li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Hộp công cụ nhỏ (Popup) -->
+    <div id="word-popup" class="word-popup">
+        <button id="popup-listen-btn">🔊 Nghe lại</button>
+        <button id="popup-stroke-btn">✍️ Luyện viết</button>
+    </div>
+
+    <!-- Cửa sổ nổi (Modal) cho Hanzi Writer -->
+    <div id="writing-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span id="modal-close-btn">&times;</span>
+            <h3 id="modal-char-header"></h3>
+            <div id="writing-target-div"></div>
+            <div class="modal-controls">
+                <button id="modal-animate-btn">Xem lại</button>
+                <button id="modal-quiz-btn">Luyện tập</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!('speechSynthesis' in window)) { alert("Trình duyệt không hỗ trợ đọc văn bản."); return; }
+            
+            // Khai báo các biến DOM và trạng thái
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance();
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.85;
+
+            const popup = document.getElementById('word-popup');
+            const popupListenBtn = document.getElementById('popup-listen-btn');
+            const popupStrokeBtn = document.getElementById('popup-stroke-btn');
+
+            const writingModal = document.getElementById('writing-modal');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalAnimateBtn = document.getElementById('modal-animate-btn');
+            const modalQuizBtn = document.getElementById('modal-quiz-btn');
+            const modalCharHeader = document.getElementById('modal-char-header');
+            
+            let writer; // Biến HanziWriter
+            let hidePopupTimer;
+            let currentWordForPopup = '';
+
+            function speak(textToSpeak) {
+                if (synth.speaking) synth.cancel();
+                // Loại bỏ các ký tự không phải tiếng Trung và dấu câu trước khi đọc
+                const cleanText = textToSpeak.replace(/[A-Za-z0-9(),.?!;:]/g, '').trim();
+                if(cleanText){
+                    utterance.text = cleanText;
+                    synth.speak(utterance);
+                }
+            }
+
+            function showWritingModal(char) {
+                modalCharHeader.textContent = char;
+                writingModal.style.display = 'flex';
+                if (!writer) {
+                    writer = HanziWriter.create('writing-target-div', char, {
+                        width: 250, height: 250, padding: 5, showOutline: true, strokeAnimationSpeed: 1, delayBetweenStrokes: 200,
+                    });
+                } else {
+                    writer.setCharacter(char);
+                }
+            }
+
+            function setupInteractiveElements() {
+                document.querySelectorAll('.chinese-text .word').forEach(wordSpan => {
+                    wordSpan.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        speak(event.target.textContent);
+                    });
+                    wordSpan.addEventListener('mouseenter', (event) => {
+                        clearTimeout(hidePopupTimer);
+                        const word = event.target.textContent;
+                        if (!/\p{Script=Han}/u.test(word)) return;
+                        
+                        currentWordForPopup = word;
+                        const rect = event.target.getBoundingClientRect();
+                        popup.style.left = `${rect.left + window.scrollX}px`;
+                        popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                        popup.style.display = 'flex';
+                    });
+                    wordSpan.addEventListener('mouseleave', () => {
+                        hidePopupTimer = setTimeout(() => { popup.style.display = 'none'; }, 300);
+                    });
+                });
+            }
+
+            // Setup listeners for popup and modal
+            popupListenBtn.addEventListener('click', () => speak(currentWordForPopup));
+            popupStrokeBtn.addEventListener('click', () => {
+                popup.style.display = 'none';
+                showWritingModal(currentWordForPopup);
+            });
+            popup.addEventListener('mouseenter', () => clearTimeout(hidePopupTimer));
+            popup.addEventListener('mouseleave', () => popup.style.display = 'none');
+
+            modalCloseBtn.addEventListener('click', () => writingModal.style.display = 'none');
+            modalAnimateBtn.addEventListener('click', () => writer && writer.animateCharacter());
+            modalQuizBtn.addEventListener('click', () => writer && writer.quiz());
+            writingModal.addEventListener('click', (event) => {
+                if (event.target === writingModal) writingModal.style.display = 'none';
+            });
+
+            // Setup other controls
+            document.getElementById('toggle-details-btn').addEventListener('click', (e) => {
+                const container = document.querySelector('.container');
+                container.classList.toggle('details-hidden');
+                e.target.textContent = container.classList.contains('details-hidden') ? 'Hiện Chi Tiết' : 'Ẩn Chi Tiết';
+            });
+            document.querySelectorAll('.read-aloud-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const container = document.getElementById(e.target.dataset.target);
+                    const text = Array.from(container.querySelectorAll('.chinese-text[data-sentence]'))
+                        .map(el => el.innerText.trim()).join('，');
+                    speak(text);
+                });
+            });
+
+            // Initialize all interactive elements
+            setupInteractiveElements();
+        });
+    </script>
+</body>
+</html>
