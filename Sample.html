@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài học Tiếng Trung Tương tác với Khung Luyện Viết</title>
+    <!-- Thư viện Hanzi Writer -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Roboto:ital,wght@0,400;0,700;1,400&display=swap');
+        :root {
+            --primary-color: #0056b3; --secondary-color: #007bff; --background-color: #f8f9fa;
+            --surface-color: #ffffff; --text-color: #333; --subtle-text-color: #6c757d;
+            --table-border-color: #dee2e6; --table-header-bg: #e9ecef;
+        }
+        body { font-family: 'Roboto', sans-serif; line-height: 1.8; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background-color: var(--surface-color); padding: 2rem 3rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .details-hidden .pinyin, .details-hidden .vietnamese { display: none; }
+        h1, h2, h3 { font-family: 'Roboto', 'Noto Sans SC', sans-serif; font-weight: 700; color: var(--primary-color); }
+        section { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px dashed #ccc; }
+        section:last-child { border-bottom: none; }
+        .controls { display: flex; gap: 10px; margin-bottom: 2rem; padding: 1rem; background-color: #e9ecef; border-radius: 8px; justify-content: center; }
+        button { border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background-color 0.2s, transform 0.1s; }
+        #toggle-details-btn { background-color: #ffc107; color: #333; }
+        .read-aloud-btn { background-color: #17a2b8; color: white; margin-top: 1rem; }
+        .chinese-text .word { font-family: 'Noto Sans SC', sans-serif; font-size: 1.5rem; cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: background-color 0.2s, color 0.2s; display: inline-block; margin: 0 1px; position: relative; }
+        .chinese-text .word:hover { background-color: var(--secondary-color); color: #fff; }
+        .pinyin, .vietnamese { transition: all 0.3s ease; }
+        .pinyin { font-style: italic; color: #555; margin-top: -5px; margin-bottom: 5px; display: block; }
+        .vietnamese { color: var(--subtle-text-color); margin-top: -5px; font-size: 0.9em; display: block; }
+        .content-item { margin-bottom: 1.5rem; border-left: 3px solid #e9ecef; padding-left: 15px; }
+        table.pronoun-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
+        table.pronoun-table th, table.pronoun-table td { border: 1px solid var(--table-border-color); padding: 12px; text-align: center; vertical-align: middle; }
+        table.pronoun-table th { background-color: var(--table-header-bg); }
+        table.pronoun-table td .chinese-text { font-size: 1.8rem; }
+        .word-popup { display: none; position: absolute; background-color: white; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; padding: 8px; z-index: 1000; flex-direction: column; gap: 6px; min-width: 160px; }
+        .word-popup button { width: 100%; text-align: left; background-color: #f8f9fa; border: 1px solid #dee2e6; font-size: 0.9rem; padding: 8px 12px; }
+        .word-popup button:hover { background-color: #e9ecef; }
+        
+        /* === CSS MỚI CHO CỬA SỔ NỔI (MODAL) Luyện Viết === */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+        .modal-content h3 { margin-top: 0; font-size: 2rem; font-family: 'Noto Sans SC', sans-serif; }
+        #writing-target-div { width: 250px; height: 250px; margin: 15px auto; }
+        .modal-controls button { margin: 5px; }
+        .modal-close-btn { position: absolute; top: 15px; right: 20px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; background: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="chinese-text" data-sentence><span class="word">基</span><span class="word">础</span><span class="word">汉</span><span class="word">语</span><span class="word">第</span><span class="word">一</span><span class="word">课</span><span class="word">：</span><span class="word">你</span><span class="word">好</span></h1>
+        <div class="controls"><button id="toggle-details-btn">Ẩn Chi Tiết (Pinyin & Dịch)</button></div>
+        <!-- Nội dung bài học (giữ nguyên) -->
+        <section id="giang-day">
+            <div id="lecture-content">
+                 <h2><span class="chinese-text" data-sentence><span class="word">讲</span><span class="word">座</span></span> (Bài giảng)</h2><p class="pinyin">(Jiǎngzuò)</p>
+                <h3><span class="chinese-text" data-sentence><span class="word">人</span><span class="word">称</span><span class="word">代</span><span class="word">词</span></span> (Đại từ nhân xưng)</h3><p class="pinyin">(Rénchēng dàicí)</p>
+                <table class="pronoun-table">
+                    <thead><tr><th>Ngôi</th><th>Số Ít</th><th>Số Nhiều</th></tr></thead>
+                    <tbody>
+                        <tr><th>Ngôi thứ 1</th><td><div class="chinese-text" data-sentence><span class="word">我</span></div><span class="pinyin">(wǒ)</span><span class="vietnamese">(tôi)</span></td><td><div class="chinese-text" data-sentence><span class="word">我</span><span class="word">们</span></div><span class="pinyin">(wǒmen)</span><span class="vietnamese">(chúng tôi)</span></td></tr>
+                        <tr><th>Ngôi thứ 2</th><td><div class="chinese-text" data-sentence><span class="word">你</span></div><span class="pinyin">(nǐ)</span><span class="vietnamese">(bạn)</span></td><td><div class="chinese-text" data-sentence><span class="word">你</span><span class="word">们</span></div><span class="pinyin">(nǐmen)</span><span class="vietnamese">(các bạn)</span></td></tr>
+                        <tr><th rowspan="2">Ngôi thứ 3</th><td><div class="chinese-text" data-sentence><span class="word">他</span></div><span class="pinyin">(tā)</span><span class="vietnamese">(anh ấy)</span></td><td><div class="chinese-text" data-sentence><span class="word">他</span><span class="word">们</span></div><span class="pinyin">(tāmen)</span><span class="vietnamese">(họ - nam/cả nam nữ)</span></td></tr>
+                        <tr><td><div class="chinese-text" data-sentence><span class="word">她</span></div><span class="pinyin">(tā)</span><span class="vietnamese">(cô ấy)</span></td><td><div class="chinese-text" data-sentence><span class="word">她</span><span class="word">们</span></div><span class="pinyin">(tāmen)</span><span class="vietnamese">(họ - toàn nữ)</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="read-aloud-btn" data-target="lecture-content">🔊 Đọc cả bài giảng</button>
+        </section>
+    </div>
+
+    <!-- Hộp công cụ nhỏ (Popup) -->
+    <div id="word-popup" class="word-popup">
+        <button id="popup-listen-btn">🔊 Nghe lại</button>
+        <button id="popup-stroke-btn">✍️ Luyện viết</button>
+    </div>
+
+    <!-- Cửa sổ nổi (Modal) cho Hanzi Writer -->
+    <div id="writing-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span id="modal-close-btn" class="modal-close-btn">&times;</span>
+            <h3 id="modal-char-header"></h3>
+            <div id="writing-target-div"></div>
+            <div class="modal-controls">
+                <button id="modal-animate-btn">Xem lại</button>
+                <button id="modal-quiz-btn">Luyện tập</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!('speechSynthesis' in window)) { alert("Trình duyệt không hỗ trợ đọc văn bản."); return; }
+
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance();
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.9;
+
+            const popup = document.getElementById('word-popup');
+            const popupListenBtn = document.getElementById('popup-listen-btn');
+            const popupStrokeBtn = document.getElementById('popup-stroke-btn');
+
+            // === LOGIC MỚI CHO MODAL Luyện Viết ===
+            const writingModal = document.getElementById('writing-modal');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalAnimateBtn = document.getElementById('modal-animate-btn');
+            const modalQuizBtn = document.getElementById('modal-quiz-btn');
+            const modalCharHeader = document.getElementById('modal-char-header');
+            let writer; // Biến HanziWriter
+            let hidePopupTimer;
+            let currentWordForPopup = '';
+
+            function speak(textToSpeak) {
+                if (synth.speaking) synth.cancel();
+                utterance.text = textToSpeak;
+                synth.speak(utterance);
+            }
+            
+            // Hàm mở và khởi tạo modal luyện viết
+            function showWritingModal(char) {
+                modalCharHeader.textContent = char;
+                writingModal.style.display = 'flex';
+                // Chỉ tạo HanziWriter một lần, sau đó chỉ cần cập nhật chữ
+                if (!writer) {
+                    writer = HanziWriter.create('writing-target-div', char, {
+                        width: 250, height: 250, padding: 5, showOutline: true, strokeAnimationSpeed: 1, delayBetweenStrokes: 200,
+                    });
+                } else {
+                    writer.setCharacter(char);
+                }
+            }
+
+            // Gắn sự kiện cho các nút trong popup
+            popupListenBtn.addEventListener('click', () => speak(currentWordForPopup));
+            popupStrokeBtn.addEventListener('click', () => {
+                popup.style.display = 'none'; // Ẩn popup nhỏ
+                showWritingModal(currentWordForPopup); // Hiện modal lớn
+            });
+
+            // Gắn sự kiện cho các nút trong modal
+            modalCloseBtn.addEventListener('click', () => writingModal.style.display = 'none');
+            modalAnimateBtn.addEventListener('click', () => writer.animateCharacter());
+            modalQuizBtn.addEventListener('click', () => writer.quiz());
+            
+            // Đóng modal khi click ra ngoài
+            writingModal.addEventListener('click', (event) => {
+                if (event.target === writingModal) {
+                    writingModal.style.display = 'none';
+                }
+            });
+
+            popup.addEventListener('mouseenter', () => clearTimeout(hidePopupTimer));
+            popup.addEventListener('mouseleave', () => popup.style.display = 'none');
+
+            function setupInteractiveElements() {
+                document.querySelectorAll('.chinese-text .word').forEach(wordSpan => {
+                    wordSpan.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        speak(event.target.textContent);
+                    });
+                    wordSpan.addEventListener('mouseenter', (event) => {
+                        clearTimeout(hidePopupTimer);
+                        const word = event.target.textContent;
+                        // Bỏ qua các ký tự không phải chữ Hán
+                        if (!/\p{Script=Han}/u.test(word)) return;
+                        
+                        currentWordForPopup = word;
+                        const rect = event.target.getBoundingClientRect();
+                        popup.style.left = `${rect.left + window.scrollX}px`;
+                        popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                        popup.style.display = 'flex';
+                    });
+                    wordSpan.addEventListener('mouseleave', () => {
+                        hidePopupTimer = setTimeout(() => { popup.style.display = 'none'; }, 300);
+                    });
+                });
+            }
+           
+            setupInteractiveElements();
+
+            // Các chức năng phụ khác
+            document.getElementById('toggle-details-btn').addEventListener('click', (e) => {
+                const container = document.querySelector('.container');
+                container.classList.toggle('details-hidden');
+                e.target.textContent = container.classList.contains('details-hidden') ? 'Hiện Chi Tiết' : 'Ẩn Chi Tiết';
+            });
+            document.querySelectorAll('.read-aloud-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const container = document.getElementById(e.target.dataset.target);
+                    const text = Array.from(container.querySelectorAll('.chinese-text[data-sentence]')).map(el => el.textContent.trim()).join('，');
+                    speak(text);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
