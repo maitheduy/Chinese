@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bài học Tiếng Trung Siêu Tương Tác: 你好 (Phiên bản cuối)</title>
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #fdf6f6; --panel-bg: rgba(255, 255, 255, 0.9); --text-primary: #333;
+            --text-secondary: #555; --accent-color: #d9534f; --accent-hover: #c9302c;
+            --success-color: #5cb85c; --error-color: #d9534f; --border-color: rgba(209, 213, 219, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.08); --font-main: 'Inter', 'Noto Sans SC', sans-serif; --font-hanzi: 'Noto Sans SC', sans-serif;
+        }
+        html, body { margin: 0; padding: 0; font-family: var(--font-main); height: 100vh; width: 100vw; overflow: hidden; background-color: var(--primary-bg); font-size: 16px; line-height: 1.7; color: var(--text-primary); }
+        .main-container { display: flex; width: 100%; height: 100%; max-width: 1800px; margin: 0 auto; padding: 24px; box-sizing: border-box; gap: 24px; }
+        .panel { flex: 1; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; height: 100%; background: var(--panel-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 8px 30px 0 var(--shadow-color); }
+        .panel-left { flex-basis: 60%; }
+        .panel-right { flex-basis: 40%; }
+        h2, h3 { font-weight: 700; color: var(--text-primary); margin-top: 0; margin-bottom: 20px; }
+        h2 { font-size: 1.6em; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
+        h3 { font-size: 1.3em; color: var(--accent-hover); }
+        .nav-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-btn { padding: 10px 18px; font-size: 0.95em; font-weight: 600; border: 2px solid var(--accent-color); border-radius: 8px; background-color: transparent; color: var(--accent-color); cursor: pointer; transition: all 0.3s ease; }
+        .nav-btn.active { background-color: var(--accent-color); color: white; }
+        .content-area { flex-grow: 1; overflow-y: auto; padding-right: 15px; }
+        .hidden { display: none !important; }
+
+        /* Left Panel Specifics */
+        .details-hidden .pinyin, .details-hidden .vietnamese { display: none; }
+        .top-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;}
+        .top-controls button { padding: 8px 16px; font-weight: 600; background-color: #ffc107; color: #333; border: none; border-radius: 8px; cursor: pointer; }
+
+        .dialogue-line { margin-bottom: 18px; font-size: 1.1em; }
+        .dialogue-line .speaker { font-weight: 700; color: var(--accent-hover); }
+        .dialogue-line .hanzi { font-family: var(--font-hanzi); font-size: 1.3em; line-height: 1.8; }
+        .dialogue-line .pinyin, .dialogue-line .vietnamese { display: block; font-size: 0.9em; transition: all 0.3s ease; }
+        .dialogue-line .pinyin { color: var(--text-secondary); }
+        .dialogue-line .vietnamese { color: #4a90e2; font-style: italic; }
+        .interactive-word { cursor: pointer; border-bottom: 2px dotted var(--accent-color); transition: background-color 0.2s; padding: 0 2px;}
+        .interactive-word:hover { background-color: #fef0f0; }
+        
+        #vocab-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        #vocab-table th, #vocab-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        #vocab-table th { background-color: #f9f9f9; font-weight: 600; }
+        #vocab-table .hanzi-cell { font-family: var(--font-hanzi); font-size: 1.6em; cursor: pointer; }
+        .audio-btn { cursor: pointer; color: var(--accent-color); font-size: 1.2em; margin-left: 5px; transition: transform 0.2s; }
+        .audio-btn:hover { transform: scale(1.1); }
+        
+        .grammar-point { margin-bottom: 25px; padding: 15px; background: #fafafa; border-left: 4px solid var(--accent-color); border-radius: 5px; }
+        .grammar-point .example p { margin: 5px 0 10px 20px; }
+
+        .read-aloud-btn { padding: 8px 16px; font-size: 0.9em; font-weight: 600; border: 1px solid var(--accent-color); color: var(--accent-color); background: transparent; border-radius: 8px; cursor: pointer; margin-top: 15px; transition: all 0.2s; }
+        .read-aloud-btn:hover { background-color: #fef0f0; }
+
+        /* Right Panel Specifics */
+        #writing-pad { text-align: center; }
+        #character-target-div { width: 250px; height: 250px; margin: 15px auto; border: 2px solid #ddd; border-radius: 8px; }
+        #writing-controls { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap;}
+        #writing-controls button { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.9em; background-color: white; }
+        
+        /* Quiz styles */
+        .quiz-wrapper { height: 100%; display: flex; flex-direction: column; }
+        .question { margin-bottom: 15px; font-size: 1.1em; font-weight: 500; }
+        .option { margin: 10px 0; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option:hover { border-color: var(--accent-color); background-color: #fef0f0; }
+        .option.selected { border-color: var(--accent-color); background-color: #fbdada; }
+        .option.correct { background-color: #dff0d8; border-color: var(--success-color); }
+        .option.incorrect { background-color: #f2dede; border-color: var(--error-color); }
+        .quiz-footer { margin-top: auto; padding-top: 15px; text-align: center; border-top: 1px solid #eee; }
+        #quizResult { font-weight: 700; font-size: 1.2em; margin-bottom: 15px; }
+
+        /* Audio status indicator */
+        .audio-status { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 5px; background-color: #ddd; }
+        .audio-status.playing { background-color: #5cb85c; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- CỘT TRÁI: KHU VỰC HỌC TẬP -->
+        <div class="panel panel-left" id="learning-panel">
+            <h2>Bài 1: 你好！(Xin chào!)</h2>
+            <div class="top-controls">
+                <button id="toggle-details-btn">Ẩn Phiên Âm & Dịch</button>
+                <span id="audio-status" class="audio-status"></span>
+            </div>
+            <div class="nav-bar learning-nav">
+                <button class="nav-btn active" onclick="showLearningSection('huìhuà-content')">1. Hội thoại (会话)</button>
+                <button class="nav-btn" onclick="showLearningSection('shēngcí-content')">2. Từ vựng (生词)</button>
+                <button class="nav-btn" onclick="showLearningSection('yǔfǎ-content')">3. Ngữ pháp (语法)</button>
+            </div>
+            <div class="content-area">
+                <div id="huìhuà-content" class="learning-section">
+                    <h3>Hội thoại 1: Chào hỏi</h3>
+                    <div id="dialogue-container"></div>
+                    <button class="read-aloud-btn" data-target="dialogue-container">🔊 Đọc cả hội thoại</button>
+                </div>
+                <div id="shēngcí-content" class="learning-section hidden">
+                    <h3>Bảng từ vựng</h3>
+                    <table id="vocab-table">
+                        <thead><tr><th>Chữ Hán</th><th>Pinyin</th><th>Nghĩa</th><th>Nghe</th></tr></thead>
+                        <tbody id="vocab-table-body"></tbody>
+                    </table>
+                </div>
+                <div id="yǔfǎ-content" class="learning-section hidden">
+                    <h3>Điểm ngữ pháp chính</h3>
+                    <div id="grammar-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: KHU VỰC THỰC HÀNH & CÔNG CỤ -->
+        <div class="panel panel-right" id="tools-panel">
+            <div class="nav-bar tool-nav">
+                <button class="nav-btn active" onclick="showTool('xiězì-tool')">Luyện viết (写字)</button>
+                <button class="nav-btn" onclick="showTool('liànxí-tool')">Bài tập (练习)</button>
+            </div>
+            
+            <div id="xiězì-tool" class="tool-section">
+                <h3 id="writing-pad-header">Luyện viết chữ: 你</h3>
+                <div id="writing-pad"><div id="character-target-div"></div>
+                    <div id="writing-controls"><button onclick="writer.animateCharacter();">Xem thứ tự</button><button onclick="writer.quiz();">Luyện tập</button></div>
+                </div>
+            </div>
+            
+            <div id="liànxí-tool" class="tool-section hidden quiz-wrapper">
+                <h3>Bài tập củng cố</h3>
+                <div class="content-area"><div id="quizContainer"></div></div>
+                <div class="quiz-footer"><div id="quizResult"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA BÀI HỌC ---
+        const vocabData = [
+            { hanzi: '我', pinyin: 'wǒ', meaning: 'tôi' }, { hanzi: '你', pinyin: 'nǐ', meaning: 'bạn' },
+            { hanzi: '他', pinyin: 'tā', meaning: 'anh ấy' }, { hanzi: '她', pinyin: 'tā', meaning: 'cô ấy' },
+            { hanzi: '们', pinyin: 'men', meaning: '(số nhiều)' }, { hanzi: '好', pinyin: 'hǎo', meaning: 'tốt' },
+            { hanzi: '是', pinyin: 'shì', meaning: 'là' }, { hanzi: '不', pinyin: 'bù', meaning: 'không' },
+            { hanzi: '吗', pinyin: 'ma', meaning: '(câu hỏi)' }, { hanzi: '学生', pinyin: 'xuéshēng', meaning: 'học sinh' },
+            { hanzi: '老师', pinyin: 'lǎoshī', meaning: 'giáo viên' },
+        ];
+        const dialogueData = [
+            { speaker: 'A', line: "你好！", pinyin: 'Nǐ hǎo!', vietnamese: 'Xin chào!' },
+            { speaker: 'B', line: "你好！", pinyin: 'Nǐ hǎo!', vietnamese: 'Chào bạn!' },
+            { speaker: 'A', line: "你是学生吗？", pinyin: 'Nǐ shì xuéshēng ma?', vietnamese: 'Bạn là học sinh phải không?' },
+            { speaker: 'B', line: "不，我不是学生，我是老师。", pinyin: 'Bù, wǒ bú shì xuéshēng, wǒ shì lǎoshī.', vietnamese: 'Không, tôi không phải học sinh, tôi là giáo viên.' },
+        ];
+        const grammarData = [
+            { title: "Câu hỏi với '吗 (ma)'", explanation: "Thêm '吗' vào cuối câu trần thuật để tạo câu hỏi 'có... không?'.", examples: ["他是老师。 → 他是老师吗？"] },
+            { title: "Phủ định với '不 (bù)'", explanation: "Đặt '不' trước động từ để phủ định. Lưu ý: 不 (bù) + 是 (shì) → bú shì.", examples: ["我不是学生。"] },
+            { title: "Đại từ số nhiều", explanation: "Thêm '们 (men)' vào sau đại từ số ít.", examples: ["我 → 我们 (chúng tôi)", "你 → 你们 (các bạn)"] },
+        ];
+        const quizData = [
+            { question: "Chọn bản dịch đúng cho '他们是学生吗？'", options: ['Các bạn là học sinh phải không?', 'Họ là giáo viên phải không?', 'Họ là học sinh phải không?'], answer: 2 },
+            { question: "Điền vào chỗ trống: 我 ___ 老师。", options: ['是', '吗', '好'], answer: 0 },
+            { question: "Từ nào dùng để tạo đại từ số nhiều?", options: ['不', '们', '吗'], answer: 1 }
+        ];
+
+        // --- GLOBAL VARIABLES ---
+        let writer;
+        let currentUtterance = null;
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDialogue(); 
+            renderVocabTable(); 
+            renderGrammar();
+            initWritingPad(vocabData.find(v => v.hanzi === '你')?.hanzi || '你');
+            renderQuiz();
+            
+            document.getElementById('toggle-details-btn').addEventListener('click', toggleDetails);
+            document.querySelectorAll('.read-aloud-btn').forEach(btn => btn.addEventListener('click', readAloudSection));
+            
+            // Kiểm tra hỗ trợ Web Speech API
+            if (!('speechSynthesis' in window)) {
+                console.warn("Trình duyệt không hỗ trợ Web Speech API");
+                document.querySelectorAll('.audio-btn, .read-aloud-btn').forEach(btn => {
+                    btn.style.opacity = '0.5';
+                    btn.title = "Tính năng không khả dụng trên trình duyệt này";
+                });
+            }
+            
+            // Theo dõi trạng thái phát âm thanh
+            const audioStatus = document.getElementById('audio-status');
+            window.speechSynthesis.onstart = function() {
+                audioStatus.classList.add('playing');
+            };
+            window.speechSynthesis.onend = window.speechSynthesis.onerror = function() {
+                audioStatus.classList.remove('playing');
+            };
+        });
+
+        // --- CORE FUNCTIONS ---
+        function playSound(text) {
+            if (!('speechSynthesis' in window)) return;
+            
+            // Dừng phát âm thanh hiện tại nếu có
+            window.speechSynthesis.cancel();
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = 'zh-CN'; 
+            currentUtterance.rate = 0.8;
+            
+            // Sửa giọng đọc cho tự nhiên hơn
+            const voices = window.speechSynthesis.getVoices();
+            const chineseVoice = voices.find(voice => 
+                voice.lang === 'zh-CN' || voice.lang === 'cmn-CN' || voice.lang.startsWith('zh-')
+            );
+            if (chineseVoice) {
+                currentUtterance.voice = chineseVoice;
+            }
+            
+            currentUtterance.onerror = function(event) {
+                console.error('Lỗi phát âm thanh:', event);
+            };
+            
+            window.speechSynthesis.speak(currentUtterance);
+        }
+        
+        function handleWordClick(event, word) {
+            playSound(word);
+            writer.setCharacter(word);
+            document.getElementById('writing-pad-header').innerHTML = `Luyện viết chữ: ${word}`;
+            
+            const clickedElement = event.target;
+            const learningPanel = document.getElementById('learning-panel');
+            const toolsPanel = document.getElementById('tools-panel');
+
+            if (learningPanel.contains(clickedElement)) {
+                showTool('xiězì-tool');
+            } else if (toolsPanel.contains(clickedElement)) {
+                learningPanel.appendChild(document.getElementById('xiězì-tool'));
+                showLearningSection('xiězì-tool');
+            }
+        }
+
+        function toggleDetails() {
+            const container = document.querySelector('.panel-left');
+            container.classList.toggle('details-hidden');
+            event.target.textContent = container.classList.contains('details-hidden') ? 'Hiện Phiên Âm & Dịch' : 'Ẩn Phiên Âm & Dịch';
+        }
+
+        function readAloudSection(event) {
+            if (!('speechSynthesis' in window)) {
+                alert("Trình duyệt của bạn không hỗ trợ tính năng đọc văn bản. Vui lòng sử dụng Chrome hoặc Edge để có trải nghiệm tốt nhất.");
+                return;
+            }
+            
+            const targetId = event.target.dataset.target;
+            const container = document.getElementById(targetId);
+            const lines = Array.from(container.querySelectorAll('.dialogue-line .hanzi'))
+                .map(el => el.textContent.trim());
+            
+            // Dừng phát âm thanh hiện tại
+            window.speechSynthesis.cancel();
+            
+            // Phát từng câu với khoảng nghỉ
+            lines.forEach((line, index) => {
+                setTimeout(() => {
+                    playSound(line);
+                }, index * 2000); // 2 giây nghỉ giữa các câu
+            });
+        }
+
+        // --- NAVIGATION & RENDERING ---
+        function showLearningSection(sectionId) {
+            document.querySelectorAll('.learning-section, #xiězì-tool').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.querySelectorAll('.learning-nav .nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (!document.getElementById(sectionId).classList.contains('tool-section')) {
+                 document.querySelector(`.learning-nav .nav-btn[onclick="showLearningSection('${sectionId}')"]`)?.classList.add('active');
+            }
+        }
+        
+        function showTool(toolId) {
+            const toolsPanel = document.getElementById('tools-panel');
+            toolsPanel.appendChild(document.getElementById('xiězì-tool'));
+            document.querySelectorAll('.tool-section').forEach(tool => tool.classList.add('hidden'));
+            document.getElementById(toolId).classList.remove('hidden');
+            document.querySelectorAll('.tool-nav .nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tool-nav .nav-btn[onclick="showTool('${toolId}')"]`)?.classList.add('active');
+        }
+
+        function tokenize(text) {
+            return text.split('').map(char => `<span class="interactive-word" onclick="handleWordClick(event, '${char}')">${char}</span>`).join('');
+        }
+        
+        function renderDialogue() {
+            const container = document.getElementById('dialogue-container');
+            container.innerHTML = dialogueData.map(line => `
+                <div class="dialogue-line">
+                    <span class="speaker">${line.speaker}: </span>
+                    <span class="hanzi">${tokenize(line.line)}</span>
+                    <span class="pinyin">${line.pinyin}</span>
+                    <span class="vietnamese">${line.vietnamese}</span>
+                </div>`).join('');
+        }
+        
+        function renderVocabTable() {
+            document.getElementById('vocab-table-body').innerHTML = vocabData.map(v => `
+                <tr>
+                    <td class="hanzi-cell" onclick="handleWordClick(event, '${v.hanzi}')">${tokenize(v.hanzi)}</td>
+                    <td>${v.pinyin}</td>
+                    <td>${v.meaning}</td>
+                    <td>
+                        <span class="audio-btn" onclick="playSound('${v.hanzi}'); event.stopPropagation();" title="Nghe phát âm">🔊</span>
+                        <span class="audio-btn" onclick="playSound('${v.pinyin}'); event.stopPropagation();" title="Nghe pinyin">🎤</span>
+                    </td>
+                </tr>`).join('');
+        }
+        
+        function renderGrammar() {
+            document.getElementById('grammar-container').innerHTML = grammarData.map(g => `
+                <div class="grammar-point">
+                    <h3>${tokenize(g.title)}</h3>
+                    <p>${g.explanation}</p>
+                    ${g.examples.map(ex => `
+                        <div class="example">
+                            <p class="hanzi">${tokenize(ex)}</p>
+                        </div>`).join('')}
+                </div>`).join('');
+        }
+        
+        function initWritingPad(initialChar) {
+            writer = HanziWriter.create('character-target-div', initialChar, {
+                width: 250, 
+                height: 250, 
+                padding: 5, 
+                showOutline: true, 
+                strokeAnimationSpeed: 1, 
+                delayBetweenStrokes: 200,
+                strokeColor: '#d9534f',
+                radicalColor: '#5cb85c'
+            });
+        }
+        
+        // --- QUIZ LOGIC ---
+        function renderQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = quizData.map((q, index) => `
+                <div class="quiz-item" id="quiz-item-${index}">
+                    <p class="question"><b>Câu ${index + 1}:</b> ${tokenize(q.question)}</p>
+                    <div class="options-container">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" onclick="selectAnswer(${index}, ${i}, this)">
+                                ${tokenize(opt)}
+                            </div>`).join('')}
+                    </div>
+                </div>`).join('');
+        }
+        
+        window.selectAnswer = function(qIndex, aIndex, el) {
+            const item = document.getElementById(`quiz-item-${qIndex}`);
+            if (item.classList.contains('answered')) return;
+            
+            item.classList.add('answered');
+            const correctAnswer = quizData[qIndex].answer;
+            const options = item.querySelectorAll('.option');
+            
+            el.classList.add(aIndex === correctAnswer ? 'correct' : 'incorrect');
+            if (aIndex !== correctAnswer) {
+                options[correctAnswer].classList.add('correct');
+            }
+            
+            // Phát âm thanh khi chọn đáp án
+            const selectedText = quizData[qIndex].options[aIndex];
+            playSound(selectedText);
+            
+            // Hiển thị kết quả khi hoàn thành
+            if (document.querySelectorAll('.quiz-item.answered').length === quizData.length) {
+                const score = document.querySelectorAll('.option.correct:not(.incorrect)').length;
+                const resultText = `Hoàn thành! Kết quả: ${score} / ${quizData.length} câu đúng.`;
+                document.getElementById('quizResult').textContent = resultText;
+                playSound(resultText);
+            }
+        };
+    </script>
+</body>
+</html>
