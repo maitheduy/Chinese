@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Nhóm - Phiên bản Hoàn thiện</title>
+    <!-- Tải thư viện Hanzi Writer -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; }
+        .main-container { max-width: 1400px; margin: 0 auto; text-align: center; }
+        h1 { color: #4a4a4a; }
+        .chat-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .chat-window { background-color: #ffffff; border: 1px solid #dddfe2; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 320px; display: flex; flex-direction: column; margin-bottom: 20px; }
+        .chat-header { color: white; padding: 10px 15px; font-weight: bold; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; align-items: center; }
+        .header-vi { background-color: #d93025; }
+        .header-en { background-color: #1e88e5; }
+        .header-zh { background-color: #fbc02d; }
+        .chat-header-controls { margin-left: auto; display: flex; gap: 10px; }
+        .control-btn { background: none; border: none; color: white; font-size: 1.2em; cursor: pointer; padding: 5px; opacity: 0.8; }
+        .control-btn:hover { opacity: 1; }
+        .message-list { list-style-type: none; padding: 15px; margin: 0; flex-grow: 1; height: 400px; overflow-y: auto; }
+        .message { padding: 8px 12px; border-radius: 18px; margin-bottom: 10px; max-width: 85%; word-wrap: break-word; position: relative; }
+        .message .user-name { font-size: 0.8em; font-weight: bold; margin-bottom: 4px; }
+        .speak-icon { cursor: pointer; font-size: 0.9em; opacity: 0.6; margin-left: 8px; vertical-align: middle; }
+        .speak-icon:hover { opacity: 1; }
+        .message-item.sent { display: flex; justify-content: flex-end; }
+        .message-item.sent .message { background-color: #0084ff; color: white; }
+        .message-item.received { display: flex; justify-content: flex-start; }
+        .message-item.received .message { background-color: #e4e6eb; color: #050505; }
+        .message-item.received .user-name { color: #65676b; }
+        .message-input-area { display: flex; padding: 10px; border-top: 1px solid #dddfe2; align-items: center; }
+        .message-input { flex-grow: 1; border: 1px solid #ccd0d5; border-radius: 18px; padding: 8px 12px; font-size: 1em; outline: none; }
+        .message-input:focus { border-color: #0084ff; }
+        .mic-button, .send-button { background-color: #1877f2; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; margin-left: 8px; cursor: pointer; font-size: 1.2em; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
+        .mic-button { background-color: #6c757d; }
+        .mic-button.listening { background-color: #dc3545; }
+        .mic-button:hover, .send-button:hover { opacity: 0.85; }
+        #unsupported-notice { color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 15px; display: none; }
+        /* CSS cho Bảng tập viết */
+        .practice-pad { padding: 10px; border-top: 2px solid #fbc02d; margin-top: auto; }
+        .practice-pad h4 { margin: 0 0 10px 0; color: #333; }
+        .practice-input { width: 60%; padding: 8px; text-align: center; font-size: 1.2em; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; }
+        .practice-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .practice-controls button { width: 40px; height: 40px; font-size: 1.5em; border-radius: 50%; border: 1px solid #ccc; background-color: #f8f9fa; cursor: pointer; }
+        .practice-controls button:hover { background-color: #e9ecef; }
+        #character-target-div { height: 150px; width: 150px; margin: 0 auto; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1>Chat Nhóm - Phiên bản Hoàn thiện</h1>
+        <p>Giao diện được tinh gọn, thêm chức năng Sao chép 📋 và Xóa 🗑️ cho mỗi cuộc hội thoại.</p>
+        <div id="unsupported-notice">Trình duyệt của bạn không hỗ trợ Web Speech API. Vui lòng sử dụng Google Chrome.</div>
+        <div class="chat-container" id="chat-app-container"></div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const USERS = { 'Alice': { name: 'Alice (Việt)', lang: 'vi', langCode: 'vi-VN' }, 'Duy': { name: 'Duy (Việt)', lang: 'vi', langCode: 'vi-VN' }, 'Bob': { name: 'Bob (Anh)', lang: 'en', langCode: 'en-US' }, 'Charlie': { name: 'Charlie (Trung)', lang: 'zh', langCode: 'zh-CN' }};
+        const STORAGE_KEY = 'multilang-chat-final-version';
+        const chatContainer = document.getElementById('chat-app-container');
+        let hanziWriterInstance = null;
+        let currentPracticeChar = '你';
+
+        // --- Các hàm API & Logic (Giữ nguyên, rút gọn) ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; const synthesis = window.speechSynthesis; let voices = {}; if (!SpeechRecognition) { document.getElementById('unsupported-notice').style.display = 'block'; } const recognition = SpeechRecognition ? new SpeechRecognition() : null; if(recognition) { recognition.continuous = false; recognition.interimResults = false; } function loadVoices() { voices = {}; synthesis.getVoices().forEach(v => { if (!voices[v.lang]) voices[v.lang] = []; voices[v.lang].push(v); }); }
+        loadVoices(); if (synthesis.onvoiceschanged !== undefined) { synthesis.onvoiceschanged = loadVoices; }
+        async function translateText(text, fromLang, toLang) { if (fromLang === toLang) return text; try { const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLang}|${toLang}`); if (!r.ok) throw new Error(); const d = await r.json(); return d.responseData.translatedText; } catch (e) { return "Lỗi dịch..."; } }
+        function getMessages() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+        function addMessage(user, originalText) { const m = getMessages(); m.push({ user, originalText, originalLang: USERS[user].lang, timestamp: new Date().getTime() }); localStorage.setItem(STORAGE_KEY, JSON.stringify(m)); }
+        function speakText(text, langCode) { synthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = langCode; if (voices[langCode]) u.voice = voices[langCode][0]; synthesis.speak(u); }
+        function handleSendMessage(user) { const i = document.getElementById(`input-${user}`); const t = i.value.trim(); if(t){ addMessage(user, t); renderAllChats(); i.value=''; i.focus(); } }
+        function handleMicClick(user) { if(!recognition) return; const b = document.querySelector(`.mic-button[data-user="${user}"]`); recognition.lang = USERS[user].langCode; recognition.onstart = () => b.classList.add('listening'); recognition.onend = () => b.classList.remove('listening'); recognition.onresult = (e) => { document.getElementById(`input-${user}`).value += e.results[0][0].transcript; }; recognition.start(); }
+
+        // --- CÁC HÀM TIỆN ÍCH MỚI ---
+        function handleCopyChat(user) {
+            const messageList = document.querySelector(`#chat-window-${user} .message-list`);
+            let chatText = `Cuộc hội thoại của ${user}:\n\n`;
+            
+            messageList.querySelectorAll('.message-item').forEach(item => {
+                let userName, messageContent;
+                if (item.classList.contains('sent')) {
+                    userName = user;
+                } else {
+                    userName = item.querySelector('.user-name').innerText;
+                }
+                // Lấy nội dung text, loại bỏ icon loa
+                const messageDiv = item.querySelector('.message > div:first-child');
+                messageContent = messageDiv.innerText.replace('🔊', '').trim();
+                
+                chatText += `${userName}: ${messageContent}\n`;
+            });
+            
+            navigator.clipboard.writeText(chatText).then(() => {
+                alert('Đã sao chép cuộc hội thoại!');
+            }).catch(err => {
+                console.error('Lỗi sao chép: ', err);
+                alert('Sao chép thất bại!');
+            });
+        }
+
+        function handleClearChat() {
+            const confirmed = window.confirm('Bạn có chắc chắn muốn xóa TOÀN BỘ lịch sử cuộc trò chuyện không? Hành động này không thể hoàn tác.');
+            if (confirmed) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderAllChats();
+                alert('Đã xóa cuộc trò chuyện.');
+            }
+        }
+        
+        // --- CÁC HÀM CHÍNH ĐƯỢC CẬP NHẬT ---
+        function initialize() {
+            Object.keys(USERS).forEach(user => {
+                const userInfo = USERS[user];
+                // Thêm HTML cho các nút điều khiển mới vào header
+                let chatWindowHtml = `
+                    <div class="chat-window" id="chat-window-${user}">
+                        <div class="chat-header header-${userInfo.lang}">
+                            <span>${userInfo.name}</span>
+                            <div class="chat-header-controls">
+                                <button class="control-btn copy-chat-btn" data-user="${user}" title="Sao chép hội thoại">📋</button>
+                                <button class="control-btn clear-chat-btn" title="Xóa toàn bộ hội thoại">🗑️</button>
+                            </div>
+                        </div>
+                        <ul class="message-list"></ul>`;
+                
+                if (user === 'Charlie') {
+                    chatWindowHtml += `
+                        <div class="practice-pad">
+                            <h4>Bảng tập viết</h4>
+                            <input type="text" id="practice-input-charlie" class="practice-input" placeholder="Dán 1 ký tự" maxlength="1">
+                            <div class="practice-controls">
+                                <button id="practice-btn" title="Luyện tập viết">✍️</button>
+                                <button id="animate-btn" title="Xem lại cách viết">🔄</button>
+                            </div>
+                            <div id="character-target-div"></div>
+                        </div>`;
+                }
+                chatWindowHtml += `<div class="message-input-area"><input type="text" id="input-${user}" class="message-input" placeholder="Nhập hoặc nói..."><button class="mic-button" data-user="${user}">🎤</button><button class="send-button" data-user="${user}">➤</button></div></div>`;
+                chatContainer.innerHTML += chatWindowHtml;
+            });
+            
+            // Khởi tạo Hanzi Writer
+            if (document.getElementById('character-target-div')) {
+                hanziWriterInstance = HanziWriter.create('character-target-div', currentPracticeChar, { width: 150, height: 150, padding: 5, showOutline: true, strokeColor: '#e60000', radicalColor: '#007bff', strokeAnimationSpeed: 1, delayBetweenStrokes: 200 });
+                document.getElementById('animate-btn').addEventListener('click', () => hanziWriterInstance.animateCharacter());
+                document.getElementById('practice-btn').addEventListener('click', () => hanziWriterInstance.quiz());
+                document.getElementById('practice-input-charlie').addEventListener('input', (e) => {
+                    const char = e.target.value;
+                    if (char) { currentPracticeChar = char; hanziWriterInstance.setCharacter(char); hanziWriterInstance.animateCharacter(); }
+                });
+            }
+            
+            // Gắn các sự kiện chung - đã thêm logic cho nút mới
+            chatContainer.addEventListener('click', e => {
+                const target = e.target.closest('button'); // Tìm nút gần nhất được nhấn
+                if (!target) return;
+
+                if (target.classList.contains('send-button')) handleSendMessage(target.dataset.user);
+                if (target.classList.contains('mic-button')) handleMicClick(target.dataset.user);
+                if (target.classList.contains('copy-chat-btn')) handleCopyChat(target.dataset.user);
+                if (target.classList.contains('clear-chat-btn')) handleClearChat();
+                
+                // Sự kiện cho icon loa
+                const speakIcon = e.target.closest('.speak-icon');
+                if(speakIcon) {
+                     speakText(speakIcon.dataset.text, speakIcon.dataset.lang);
+                }
+            });
+
+            chatContainer.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('message-input')) { handleSendMessage(e.target.id.split('-')[1]); } });
+            renderAllChats();
+        }
+
+        async function renderAllChats() {
+            const allMessages = getMessages();
+            for (const currentUser of Object.keys(USERS)) {
+                const chatWindow = document.getElementById(`chat-window-${currentUser}`);
+                if (!chatWindow) continue;
+                const messageList = chatWindow.querySelector('.message-list');
+                messageList.innerHTML = '';
+                for (const message of allMessages) {
+                    const messageItem = document.createElement('li');
+                    const messageBubble = document.createElement('div');
+                    const messageType = message.user === currentUser ? 'sent' : 'received';
+                    messageItem.className = `message-item ${messageType}`;
+                    messageBubble.className = 'message';
+                    const targetLangInfo = USERS[currentUser];
+                    const isOriginal = message.originalLang === targetLangInfo.lang;
+                    let displayText = message.originalText;
+                    if (!isOriginal) {
+                        displayText = await translateText(message.originalText, message.originalLang, targetLangInfo.lang);
+                    }
+                    const langCodeToSpeak = isOriginal ? USERS[message.user].langCode : targetLangInfo.langCode;
+                    let bubbleHTML = '';
+                    if (messageType === 'received') bubbleHTML += `<div class="user-name">${message.user}</div>`;
+                    
+                    // NỘI DUNG CHÍNH CỦA BONG BÓNG CHAT
+                    bubbleHTML += `<div>${displayText} <span class="speak-icon" data-text="${displayText}" data-lang="${langCodeToSpeak}">🔊</span></div>`;
+                    
+                    // ** DÒNG HIỂN THỊ NGÔN NGỮ GỐC ĐÃ BỊ XÓA **
+
+                    messageBubble.innerHTML = bubbleHTML;
+                    messageItem.appendChild(messageBubble);
+                    messageList.appendChild(messageItem);
+                }
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>
